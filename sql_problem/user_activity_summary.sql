@@ -62,7 +62,8 @@ top_products_by_viewers as (
 ),
 
 top_products_summary as (
-    select year_month, object_agg(product_id, page_views) as top_products
+    -- top_products: returns [PRODUCT NAME]:[PAGE VIEWS] sorted by unique viewers
+    select year_month, listagg(product_id || ':' || page_views, ', ') within group (order by rnk) top_products
     from top_products_by_viewers
     group by 1
 )
