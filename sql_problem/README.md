@@ -7,7 +7,7 @@ column|description
 user_id|Unique identifier for the user
 activity_type|Type of activity (e.g. "login", "purchase", "view_product", "add_to_cart")
 activity_timestamp|Timestamp when the activity occurred
-product_id|Unique identifier for the product (e.g. "view_product", "add_to_cart", "purchase")
+product_id|Unique identifier for the product (relevant for "view_product", "add_to_cart", "purchase" activities)
 activity_details|Semi-structured JSON containing additional information about the activity (e.g., "price", "quantity", "page views")
 
 
