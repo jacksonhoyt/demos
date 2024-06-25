@@ -26,6 +26,25 @@ Each part is described further below under Details.
   </tr>
 </table>
 
+##### Table of Contents  
+- [Assumptions](#assumptions)  
+- [Details](#details)  
+    - [DAG Triggers](#dagtriggers)
+    - [DAG Configuration](#dagconfig)
+    - [Snowflake Connection](#snowflakeconnect)
+    - [Fetch Columns](#fetchcolumns)
+    - [Detect And Report Anomalies](#detectanomalies)
+        - [Numeric Check](#numeric)
+        - [Categorical Check](#categorical)
+        - [Temporal Check](#temporal)
+        - [Evaluate Data Type Checks](#evaldatatypes)
+        - [Null Check](#nullcheck)
+        - [Row Count Check](#rowcount)
+    - [Send Slack Alerts](#slackalert)
+
+
+
+<a name="assumptions"/>
 
 Assumptions
 ========
@@ -50,9 +69,13 @@ Assumptions
 - 5% is sufficient threshold for capturing year-months with more than 5% records being NULL
 - 50% is sufficient threshold for capturing year-months with more than 50% shift in row counts to previous month
 
+<a name="details"/>
+
 Details
 ========
-#### DAG triggered by upstream process
+<a name="dagtriggers"/>
+
+#### DAG Triggers
 Any of the following are valid ways for this DAG to be triggered. It would be recommended for an upstream process to call this DAG at any stage of ETL to perform anomaly detection, whether that is done for raw input data or transformed data.
 - Trigger DAG via Airflow UI and user inputs table_name and datetime_column
 - Trigger DAG via upstream DAG using `TriggerDagRunOperator('anomaly_detect', conf = {"table_name": "my_table", "datetime_column": "my_datetime_column"}, ...)`
@@ -70,7 +93,9 @@ Any of the following are valid ways for this DAG to be triggered. It would be re
     }'
     ```
 
-#### DAG definition and config parameters
+<a name="dagconfig"/>
+
+#### DAG Configuration
 Note the `schedule_internal=None` as this is never scheduled to run on its own. However, when the DAG is triggered it is `params={"table_name": "MY_TABLE", "datetime_column": "MY_DATETIME_COLUMN"}` that prepares the DAG to receive the **table** and **datetime** inputs.
 
 ```python
@@ -95,6 +120,8 @@ with DAG(
 ) as dag:
 ```
 
+<a name="snowflakeconnect"/>
+
 #### Establish Snowflake connection and cursor object
 The Snowflake connection and cursor are established in `detect_anomalies` via `with snowflake.connector.connect(...) as conn:` to ensure the connection closes when the task ends. The Snowflake connection is only used inside `detect_anomalies` and its subprocess shown next.
 
@@ -113,7 +140,9 @@ def detect_anomalies(table_name, datetime_col, **kwargs):
         ...
 ```
 
-#### Fetch Column Information
+<a name="fetchcolumns"/>
+
+#### Fetch Columns
 `detect_anomalies` calls the subprocess `fetch_table_info` to retrieve column metadata on the **table** from Snowflake's `information_schema.columns`. The `data_type` will inform `detect_anomalies` what method of anomaly detection to use.
 
 If anomalies are found, `dest` is where the data will be written in Snowflake and `reporting` will be changed to True to trigger Slack alerts. These will have more context throughout the following sections.
@@ -138,6 +167,8 @@ def fetch_table_info(table_name, datetime_col, cursor):
     """
     return cursor.execute(query).fetchall()
 ```
+
+<a name="detectanomalies"/>
 
 #### Detect and Report Anomalies
 Performs various checks for anomalies across different data types and record anomalous data to Snowflake `dest`. All checks are done via SQL to leverage Snowflake's compute and processing power, as opposed to pulling data into memory and analyzing via one large Dataframe.
@@ -164,6 +195,8 @@ anomaly_task = detect_anomalies(table_name='{{ dag_run.conf["table_name"] }}',da
 ```
 `anomaly_task` is how the DAG will later refer to this task when orchestrating tasks.
 
+<a name="numeric"/>
+
 ##### 1. Numeric Check
 Within the `columns_info` loop, if the data type is 'NUMBER', 'FLOAT', or 'INTEGER' a SQL statement is written designed to select any values that are more than 3 standard deviations away from the mean. Three standard deviations is commonly used as a bound for outliers, but this can be adjusted to fit any use case.
 
@@ -185,6 +218,9 @@ Within the `columns_info` loop, if the data type is 'NUMBER', 'FLOAT', or 'INTEG
                 """
             ...
 ```
+
+<a name="categorical"/>
+
 ##### 2. Categorical Check
 The next stage applies looks at data types of 'VARCHAR', 'STRING', 'TEXT'. Similarly, it writes a SQL statement designed to identify infrequent categorical values which occur less than 5% of the average frequency. In other terms, this checks if a string value occurs significantly less than other values.
 
@@ -213,6 +249,9 @@ The next stage applies looks at data types of 'VARCHAR', 'STRING', 'TEXT'. Simil
                 """
             ...
 ```
+
+<a name="temporal"/>
+
 ##### 3. Temporal Check
 The next stage is the final check based on data type and applies to temporal data types 'DATE', 'TIMESTAMP', and 'TIMESTAMP_NTZ'. This section writes a simple SQL statement designed to find datetime values outside the expected range, such as in the future or before the year 2000.
 
@@ -235,6 +274,8 @@ And whatever **query** was established,
             ...
 ```
 
+<a name="evaldatatypes"/>
+
 ##### Evaluate Data Type Checks
 Using whatever SQL was written into **query**, create a dataframe with `df_to_snowflake(conn,query,dest)` providing connetion, query, and destination table - which is a method created for this DAG. 
 
@@ -256,6 +297,8 @@ def df_to_snowflake(conn,query,dest):
     return df
 ...
 ```
+
+<a name="nullcheck"/>
 
 ##### 4. Null Check
 The last column level check is to find columns with more than 5% null values by year-month. The data is selected to match the established schema.
@@ -287,6 +330,9 @@ If any records are populated in the dataframes created for this null check or th
                 reporting = True
             ...
 ```
+
+<a name="rowcount"/>
+
 ##### 5. Row Count Check
 This is the final check which compares row counts month-over-month to identify any significant changes (ie: >50%, but this threshold can be changed to fit the application).
 
@@ -335,6 +381,8 @@ When `detect_anomalies` ends, if reporting is true then **dest** is returned and
             return dest
 ...
 ```
+
+<a name="slackalert"/>
 
 #### Send Slack Alerts
 The SlackWebhookOperator passes in the Slack connection to send a message to the desired channel(s). The message injects the **dest** returned by `detect_anomalies`.
