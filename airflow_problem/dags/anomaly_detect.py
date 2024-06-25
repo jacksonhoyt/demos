@@ -26,9 +26,6 @@ If anomalies are found, the anomalous data is written to a Snowflake table and a
 from airflow import DAG
 from airflow.decorators import task
 from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
-from airflow.operators.python import PythonOperator
-from airflow.providers.slack.operators.slack import SlackAPIFileOperator
-from airflow.providers.snowflake.transfers.copy_into_snowflake import CopyFromExternalStageToSnowflakeOperator
 from datetime import datetime, timedelta
 import snowflake.connector
 from snowflake.connector.pandas_tools import write_pandas
@@ -66,7 +63,7 @@ with DAG(
     schedule_interval=None,
     start_date=datetime(2024, 6, 22),
     catchup=False,
-    params={"table_name": "UBER_RAW_DATA_JUN14", "datetime_column": "DATETIME"}, # when calling the DAG, provide this config with the desired table_name and datetime_column values
+    params={"table_name": "MY_TABLE", "datetime_column": "MY_DATETIME_COLUMN"}, # when calling the DAG, provide this config with the desired table_name and datetime_column values
 ) as dag:
     
     @task(task_id='detect_anomalies')
@@ -82,7 +79,6 @@ with DAG(
             cursor = conn.cursor()
 
             columns_info = fetch_table_info(table_name, datetime_col, cursor) # columns to check from table_name
-            print(columns_info)
             dest = f"{table_name.upper()}_ANOMALIES_{datetime.today().strftime('%Y_%m_%d_%H%M')}" # destination table if anything is reported
             reporting = False # mark true if anything is reported
 
@@ -176,7 +172,8 @@ with DAG(
                 return dest
     
     # check the provided table_name for anomalies in the data using the datetime_column
-    anomaly_task = detect_anomalies(table_name='{{ dag_run.conf["table_name"] }}',datetime_col='{{ dag_run.conf["datetime_column"] }}') # works when triggered from airflow CLI `airflow dags trigger 'anomaly_detect' --conf '{"table": "UBER_RAW_DATA_JUN14"}'` 
+    anomaly_task = detect_anomalies(table_name='{{ dag_run.conf["table_name"] }}',datetime_col='{{ dag_run.conf["datetime_column"] }}')
+
     # if detect_anomalies returned a value trigger the slack task 
     @task.branch(task_id='branch_task')
     def branch_func(ti=None):
