@@ -1,6 +1,6 @@
 Overview
 ========
-For the Airflow and SQL problems, I provided solutions and summaries to each in separate directories with direct links in the following sections. And further down this page, the DBT quality question is answered.
+For the Airflow and SQL problems, I provided solutions and summaries to each in separate GitHub directories with direct links to my work in the following sections. And further down this page, the DBT quality question is answered.
 
 Airflow Problem
 ========
