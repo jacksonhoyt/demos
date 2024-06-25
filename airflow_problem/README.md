@@ -26,7 +26,8 @@ Each part is described further below under Details.
   </tr>
 </table>
 
-##### Table of Contents  
+Table of Contents  
+========
 - [Assumptions](#assumptions)  
 - [Details](#details)  
     - [DAG Triggers](#dagtriggers)
