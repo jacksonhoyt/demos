@@ -50,6 +50,8 @@ Table of Contents
 Assumptions
 ========
 ##### Environment
+- Python 3.8 or higher
+- Airflow 2.9 or higher
 - An Airflow environment with Python and libraries in `requirements.txt` installed
 - DAG is triggered manually (via Airflow UI, Airflow CLI, or REST API call) and provided the table name and datetime column as config parameters
 - A Slack app with valid webhook
