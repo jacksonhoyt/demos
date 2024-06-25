@@ -33,7 +33,7 @@ top_products | A list (or separate columns) for the top 3 products by views, alo
 # SOLUTION
 ##### EXAMPLE OUTPUT
 ###### (using sample data in `./user_activity_log_DDL.sql`)
-This is the output provided by the SQL in the Solution file
+This is the output provided by the SQL below.
 YEAR_MONTH|MAU|RETENTION_RATE|AVG_ACTIVITIES_PER_USER|TOP_PRODUCTS
 ---|---|---|---|---
 2024-06|4|0.00%|1.000000|PRODUCT_B:10, PRODUCT_A:17
