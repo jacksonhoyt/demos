@@ -17,10 +17,10 @@ SQL Problem
 ========
 A solution to the SQL problem is in `./sql_problem`.
 
-Solution: `./airflow_problem/dags/anomaly_detect.py`
+Solution: `./sql_problem/user_activity_summary.sql`
 <a href="https://github.com/jacksonhoyt/lennar/blob/main/sql_problem/user_activity_summary.sql" target="_blank">Jump to solution</a>
 
-Summary: `./airflow_problem/README.md`
+Summary: `./sql_problem/README.md`
 <a href="https://github.com/jacksonhoyt/lennar/tree/main/sql_problem#solution" target="_blank">Jump to solution summary</a>
 
 
