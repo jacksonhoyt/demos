@@ -1,3 +1,7 @@
+Overview
+========
+For the Airflow and SQL problems, I provided solutions and summaries to each in separate directories with direct links in the following sections. And further down this page, the DBT quality question is answered.
+
 Airflow Problem
 ========
 A solution to the Airflow problem is in `./airflow_problem`.
