@@ -1,6 +1,6 @@
 Overview
 ========
-For the Airflow and SQL problems, I provided solutions and summaries to each in separate GitHub directories with direct links to my work in the following sections. And further down this page, the DBT quality question is answered.
+I have provided an Airflow and SQL problem to demonstrate Python and SQL abilities. Solutions and summaries are linked to GitHub, below.
 
 Airflow Problem
 ========
@@ -22,22 +22,3 @@ Solution: `./sql_problem/user_activity_summary.sql`
 
 Summary: `./sql_problem/README.md`
 <a href="https://github.com/jacksonhoyt/lennar/tree/main/sql_problem#solution" target="_blank">Jump to solution summary</a>
-
-
-DBT Quality
-========
-
-To support a team of analysts contributing to the DBT project I would approach quality standards in the following ways, and personally look to improve my DevOps knowledge to implement and streamline CI/CD.
-
-1. Define and document standards (*Ensure the team is aware of coding standards and CI/CD process*)
-- Code formatting, style, best practices (adhere to DBT style guide)
-- Detail dbt specific standards (naming conventions, model organization, etc)
-
-2. Enforcement (*Changes must be opened as a PR in GitHub, code cannot be merged if linting fails*)
-- SQL Linting: dbt recommends SQLFluff
-- Python Linting: dbt recommends Black or Ruff
-
-3. CI/CD Automation (*Code also cannot be merged without passing CI checks*)
-- GitHub Actions to run automated checks on every pull request
-- Integrate dbt Cloud with GitHub to listen for PR's, using dbt Cloud's Slim CI to automate checks that the code builds without error
-- A data diff tool like Datafold can check how the data will be impacted by the changes in the PR, which may be empowered by Snowflake's zero-copy cloning by creating a temporary clone of the data to perform tests on.
