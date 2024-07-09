@@ -1,5 +1,5 @@
 use database testdb;
-use schema lennar;
+use schema testschema;
 
 ------------------------------------
 -- staging monthly activity
