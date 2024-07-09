@@ -1,5 +1,5 @@
 use database testdb;
-use schema lennar;
+use schema testschema;
 
 CREATE OR REPLACE TABLE user_activity_log (
     user_id VARCHAR COMMENT 'Unique identifier for the user',
